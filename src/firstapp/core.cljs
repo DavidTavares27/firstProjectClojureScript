@@ -5,25 +5,40 @@
 
 ;; -------------------------
 ;; Views
-(def todos (r/atom
+(defonce todos (r/atom
             [{:desc "Elon Musk (US$ 219 bilhões): fundador da Tesla e da SpaceX" :completed true}
-            {:desc "Jeff Bezos (US$ 171 bilhões): fundador da Amazon" :completed false}
-            {:desc "Bernard Arnault e família (US$ 158 bilhões): líder do império LVMH" :completed true}
-            {:desc "Bill Gates (US$ 129 bilhões): fundador da Microsoft" :completed false}
-            {:desc "Warren Buffett (US$ 118 bilhões): dono da Berkshire Hathaway" :completed true}]))
+             {:desc "Jeff Bezos (US$ 171 bilhões): fundador da Amazon" :completed false}
+             {:desc "Bernard Arnault e família (US$ 158 bilhões): líder do império LVMH" :completed true}
+             {:desc "Bill Gates (US$ 129 bilhões): fundador da Microsoft" :completed false}
+             {:desc "Warren Buffett (US$ 118 bilhões): dono da Berkshire Hathaway" :completed true}]))
+
+(def db {:task/id {1 {:desc "Elon Musk (US$ 219 bilhões): fundador da Tesla e da SpaceX" :completed true}
+                   2 {:desc "Jeff Bezos (US$ 171 bilhões): fundador da Amazon" :completed false}
+                   3 {:desc "Bernard Arnault e família (US$ 158 bilhões): líder do império LVMH" :completed true}
+                   4 {:desc "Bill Gates (US$ 129 bilhões): fundador da Microsoft" :completed false}
+                   5 {:desc "Warren Buffett (US$ 118 bilhões): dono da Berkshire Hathaway" :completed true}}})
+(get-in db [:task/id 3])
+
+
 
 (defn todo-form []
-  (let [new-item (r/atom "") new-item-complted (r/atom false)]
+  (let [new-item (r/atom "") new-item-completed (r/atom false)]
     (fn []
       [:form {:on-submit (fn [e]
                            (.preventDefault e)
-                           (swap! todos conj {:completed @new-item-complted :desc @new-item})
+                           (swap! todos conj {:completed @new-item-completed :desc @new-item})
                            (reset! new-item "")
-                           (reset! new-item-complted false))}
+                           (reset! new-item-completed false))}
        [:input {:type "checkbox" 
-                :value @new-item-complted
-                :on-change #(reset! new-item-complted (-> % .-target .-checked))}]
+                :value @new-item-completed
+                :on-change (fn[e] 
+                             (let [new-item-value (.-checked (.-target e))
+                                   new-item-value2 (-> e
+                                                       .-target
+                                                       .-checked)]
+                               (reset! new-item-completed new-item-value2)))}]
        
+
        [:input {:type "text"
                 :value @new-item
                 :placeholder "Adcionar novo nome"
